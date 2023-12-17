@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
 import os
 from itertools import permutations
-import time
+import timeit
 
 # Get the absolute path to the image file
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -116,21 +116,29 @@ def tsp_heuristic(start_node, result_label):
     try:
         global G  # Access the global variable G
 
-        start_time = time.time()  # Record start time
+        # Wrapper function for timeit
+        def time_heuristic():
+            # Record start time
+            start_time = timeit.default_timer()
 
-        # Apply the heuristic TSP algorithm (nearest neighbor) with the specified start node
-        tour, cost = greedy_tsp(G, start_node)
+            # Apply the heuristic TSP algorithm (nearest neighbor) with the specified start node
+            tour, cost = greedy_tsp(G, start_node)
 
-        end_time = time.time()  # Record end time
-        execution_time = end_time - start_time
+            # Record end time
+            end_time = timeit.default_timer()
+            execution_time = end_time - start_time
 
-        if tour:
-            result_label.config(
-                text=f"Heuristic TSP Solution (starting from {start_node}): {tour}\nTotal Cost: {cost}\nExecution Time: {execution_time:.6f} seconds",
-                font=("Helvetica", 14),  # Increase font size
-            )
-        else:
-            result_label.config(text="Unable to find a solution.")
+            if tour:
+                result_label.config(
+                    text=f"Heuristic TSP Solution (starting from {start_node}): {tour}\nTotal Cost: {cost}\nExecution Time: {execution_time:.6f} seconds",
+                    font=("Helvetica", 14),  # Increase font size
+                )
+            else:
+                result_label.config(text="Unable to find a solution.")
+
+        # Measure the execution time
+        execution_time = timeit.timeit(time_heuristic, number=1)
+        print(f"Heuristic Execution Time: {execution_time:.6f} seconds")
 
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
@@ -140,24 +148,33 @@ def tsp_heuristic(start_node, result_label):
 def tsp_exact(graph, result_label):
     try:
         nodes = list(map(str, graph.nodes()))  # Convert nodes to strings
-        min_cost = float('inf')
-        best_tour = None
 
-        start_time = time.time()  # Record start time
+        # Wrapper function for timeit
+        def time_exact():
+            # Record start time
+            start_time = timeit.default_timer()
 
-        for tour in permutations(nodes):
-            cost = calculate_tour_cost(graph, tour)
-            if cost < min_cost:
-                min_cost = cost
-                best_tour = tour
+            min_cost = float('inf')
+            best_tour = None
 
-        end_time = time.time()  # Record end time
-        execution_time = end_time - start_time
+            for tour in permutations(nodes):
+                cost = calculate_tour_cost(graph, tour)
+                if cost < min_cost:
+                    min_cost = cost
+                    best_tour = tour
 
-        result_label.config(
-            text=f"Exact TSP Solution: {best_tour}\nTotal Cost: {min_cost}\nExecution Time: {execution_time:.6f} seconds",
-            font=("Helvetica", 14),  # Increase font size
-        )
+            # Record end time
+            end_time = timeit.default_timer()
+            execution_time = end_time - start_time
+
+            result_label.config(
+                text=f"Exact TSP Solution: {best_tour}\nTotal Cost: {min_cost}\nExecution Time: {execution_time:.6f} seconds",
+                font=("Helvetica", 14),  # Increase font size
+            )
+
+        # Measure the execution time
+        execution_time = timeit.timeit(time_exact, number=1)
+        print(f"Exact Execution Time: {execution_time:.6f} seconds")
 
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
